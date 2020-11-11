@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Xml.Serialization;
@@ -8,16 +9,14 @@ namespace ChatClient
 {
     class ChatController
     {
-        private string reciveIp;
-        private string senderIp;
-        private string senderName;
+        private User sender;
+        private User reciver;
         private byte messageType;
         private ICommunicationHandler commHandler;
 
-     
-        public string ReciveIp { get => reciveIp; set => reciveIp = value; }
-        public string SenderIp { get => senderIp; set => senderIp = value; }
-        public string SenderName { get => senderName; set => senderName = value; }
+
+        public User Sender { get => sender; set => sender = value; }
+        public User Reciver { get => reciver; set => reciver = value; }
 
         // Types
         // 1 = string message
@@ -31,20 +30,23 @@ namespace ChatClient
 
 
 
-        public ChatController(string reciveIp, string senderIp, byte messageType, ICommunicationHandler commHandler, string senderName)
+        public ChatController(string reciveIp, string senderIp, byte messageType, ICommunicationHandler commHandler, string senderName, string reciverName)
         {
-            ReciveIp = reciveIp;
-            SenderIp = senderIp;
+            sender = new User(senderName, senderIp);
+            Reciver = new User(reciverName, reciveIp);
+
             MessageType = messageType;
             CommHandler = commHandler;
-            SenderName = senderName;
+
         }
 
-        public void Update(string name, string text)
+        // Use for update ign chat
+        public void Update()
         {
-
+            commHandler.Reciver();
         }
 
+        // Connects to server
         public void Connect()
         {
             if (commHandler is IConnect)
@@ -53,15 +55,33 @@ namespace ChatClient
                 Handler.Connect();
             }
         }
-
-        public void SendMessage(string message)
+        public void Disconnect()
         {
-            //Update(SenderName, message);
-            //MessageFactory.CreateMessage(message, 1);
-            commHandler.Send(message);
+            if (commHandler is IDisconnect)
+            {
+                IDisconnect Handler = (IDisconnect)commHandler;
+                Handler.Disconnect();
+            }
         }
 
+        // Getting message from program/Main and creating message with messagefactory and passing it on to the socketHandler
+        public void SendMessage(string message)
+        {
+            // creating message of messagetype
+            Message msg = MessageFactory.CreateMessage(MessageType, Sender, Reciver, message);
+            if (msg is XmlMsg)
+            {
+                XmlMsg xmlmsg = (XmlMsg)msg;
+                commHandler.Send(xmlmsg.MessageBuffer);
+            }
+            else if(msg is PlainTextMsg)
+            {
+                PlainTextMsg plainMsg = (PlainTextMsg)msg;
+                commHandler.Send(plainMsg.MessageBuffer);
+            }
+        }
 
+        // Use for keys later
         public void GetKey()
         {
 

@@ -4,20 +4,23 @@ using System.Text;
 
 namespace ChatClient
 {
-    class Message
+    public class Message
     {
-        private string receiverIP;
-        private string senderIP;
-        private string uMessage;
-        public string ReceiverIP { get => receiverIP; set => receiverIP = value; }
-        public string SenderIP { get => senderIP; set => senderIP = value; }
-        public string MessageString { get => uMessage; set => uMessage = value; }
+        public User To { get; set; }
+        public User From { get; set; }
 
-        public Message(string message)
+        public MessageBody Mb { get; set; }
+
+
+        public Message()
         {
-            ReceiverIP = receiverIP;
-            SenderIP = senderIP;
-            MessageString = message;
+        }
+
+        public Message(User to, User from, MessageBody mb)
+        {
+            To = to;
+            From = from;
+            Mb = mb;
         }
     }
 }

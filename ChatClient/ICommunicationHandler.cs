@@ -8,7 +8,7 @@ namespace ChatClient
 {
     interface ICommunicationHandler
     {
-        void Send(string s);
+        void Send(byte[] msg/*string senderName, string senderIp, string reciverName, string reciverIp, string message*/);
         void Reciver();
         void Listen();
     }
